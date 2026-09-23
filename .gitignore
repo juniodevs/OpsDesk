@@ -1,0 +1,15 @@
+node_modules/
+dist/
+uploads/*
+!uploads/.gitkeep
+playwright-report/
+test-results/
+dev.db
+*.log
+.DS_Store
+
+# Planning & design notes
+DESIGN.md
+DESIGN.MD
+PLAN.md
+PLAN.MD
