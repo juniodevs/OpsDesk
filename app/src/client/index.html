@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="OpsDesk - Plataforma Operacional de Gestão e Triagem de Incidentes">
+  <title>OpsDesk - Gestão de Incidentes</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <!-- Visão de Login Real -->
+  <section id="view-login" class="login-wrapper" data-testid="view-login">
+    <div class="login-card">
+      <div class="login-header">
+        <h1 class="login-title">OpsDesk</h1>
+        <span class="environment-badge">OPERACIONAL</span>
+        <p class="login-subtitle">Entre com suas credenciais para acessar o painel de incidentes.</p>
+      </div>
+
+      <div id="login-error-alert" data-testid="login-error-alert"></div>
+
+      <form id="form-login" data-testid="form-login">
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label for="login-email" class="form-label">E-mail corporativo *</label>
+          <input 
+            type="email" 
+            id="login-email" 
+            class="form-input" 
+            placeholder="usuario@opsdesk.local"
+            data-testid="input-login-email" 
+            required 
+          />
+        </div>
+
+        <div class="form-group" style="margin-bottom: 18px;">
+          <label for="login-password" class="form-label">Senha de acesso *</label>
+          <input 
+            type="password" 
+            id="login-password" 
+            class="form-input" 
+            placeholder="••••••••"
+            data-testid="input-login-password" 
+            required 
+          />
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="btn-login-submit" data-testid="btn-login-submit" style="width: 100%;">
+          Entrar no Sistema
+        </button>
+      </form>
+
+      <div class="demo-accounts-box">
+        <p class="demo-accounts-title">Preenchimento rápido para homologação:</p>
+        <div class="demo-account-buttons">
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-fill-admin" data-testid="btn-fill-admin">
+            Admin
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-fill-analyst" data-testid="btn-fill-analyst">
+            Analista
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-fill-reporter" data-testid="btn-fill-reporter">
+            Relator
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Container do Painel Autenticado -->
+  <div id="view-dashboard" data-testid="view-dashboard" style="display: none;">
+    <!-- Barra de demonstração para troca rápida de perfil em testes/avaliação -->
+    <div class="demo-role-switcher" data-testid="demo-switcher">
+      <span>Alternar usuário ativo:</span>
+      <div class="demo-buttons">
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-demo-admin" data-testid="demo-login-admin">
+          Admin (Carlos)
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-demo-analyst" data-testid="demo-login-analyst">
+          Analista (Mariana)
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-demo-reporter" data-testid="demo-login-reporter">
+          Relator (Lucas)
+        </button>
+      </div>
+    </div>
+
+    <!-- Cabeçalho Principal -->
+    <header class="app-header">
+      <div class="brand-section">
+        <h1 class="app-title" data-testid="header-app-title">OpsDesk</h1>
+        <span class="environment-badge">OPERACIONAL</span>
+      </div>
+
+      <div class="user-controls">
+        <div class="user-badge" id="user-info-box" data-testid="user-info-box">
+          <span class="user-name" id="user-display-name" data-testid="user-display-name">Carregando...</span>
+          <span class="role-tag" id="user-display-role" data-testid="user-display-role">ADMIN</span>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-logout" data-testid="btn-logout">
+          Sair
+        </button>
+      </div>
+    </header>
+
+    <!-- Container Principal -->
+    <main class="main-container">
+      <!-- Alertas Globais -->
+      <div id="global-alert-container"></div>
+
+    <!-- Visão 1: Listagem de Incidentes -->
+    <section id="view-tickets-list" data-testid="view-tickets-list">
+      <div class="action-toolbar">
+        <div class="filters-group">
+          <div class="search-input-wrapper">
+            <input 
+              type="text" 
+              class="search-input" 
+              id="search-input" 
+              placeholder="Buscar por título, ID ou descrição..."
+              data-testid="search-input"
+              aria-label="Buscar incidentes"
+            />
+          </div>
+
+          <select class="select-filter" id="filter-status" data-testid="filter-status" aria-label="Filtrar por status">
+            <option value="ALL">Todos os status</option>
+            <option value="OPEN">Aberto (OPEN)</option>
+            <option value="INVESTIGATING">Em investigação</option>
+            <option value="MITIGATED">Mitigado</option>
+            <option value="RESOLVED">Resolvido</option>
+            <option value="CLOSED">Fechado</option>
+          </select>
+
+          <select class="select-filter" id="filter-severity" data-testid="filter-severity" aria-label="Filtrar por severidade">
+            <option value="ALL">Todas as severidades</option>
+            <option value="P1">P1 - Crítico</option>
+            <option value="P2">P2 - Alto</option>
+            <option value="P3">P3 - Médio</option>
+            <option value="P4">P4 - Baixo</option>
+          </select>
+
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-clear-filters" data-testid="btn-clear-filters">
+            Limpar filtros
+          </button>
+        </div>
+
+        <button type="button" class="btn btn-primary" id="btn-open-create-modal" data-testid="btn-open-create-modal">
+          + Novo Incidente
+        </button>
+      </div>
+
+      <!-- Tabela / Lista de Incidentes -->
+      <div class="table-container" style="margin-top: 16px;">
+        <div id="table-loading-state" class="state-box" data-testid="state-loading" style="display: none;">
+          <p class="state-title">Carregando incidentes...</p>
+          <p class="state-desc">Consultando base de dados operacional.</p>
+        </div>
+
+        <div id="table-empty-state" class="state-box" data-testid="state-empty" style="display: none;">
+          <p class="state-title">Nenhum incidente encontrado</p>
+          <p class="state-desc">Não há chamados com os filtros atuais ou nenhum registro foi criado ainda.</p>
+        </div>
+
+        <table class="tickets-table" id="tickets-table" data-testid="tickets-table">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Título e Serviço</th>
+              <th scope="col">Severidade</th>
+              <th scope="col">Status</th>
+              <th scope="col">Responsável</th>
+              <th scope="col">Aberto em</th>
+            </tr>
+          </thead>
+          <tbody id="tickets-tbody" data-testid="tickets-tbody">
+            <!-- Linhas inseridas dinamicamente via JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Visão 2: Detalhes do Incidente Selecionado -->
+    <section id="view-ticket-detail" style="display: none;" data-testid="ticket-detail-view">
+      <div style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-back-to-list" data-testid="btn-back-to-list">
+          &larr; Voltar para listagem
+        </button>
+        <div id="admin-actions-bar">
+          <button type="button" class="btn btn-danger btn-sm" id="btn-delete-ticket" data-testid="btn-delete-ticket" style="display: none;">
+            Excluir Incidente
+          </button>
+        </div>
+      </div>
+
+      <div class="ticket-detail-view">
+        <!-- Coluna Principal: Informações, Notas e Anexos -->
+        <div class="detail-main">
+          <div class="detail-card">
+            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+              <span class="ticket-number" id="detail-ticket-number" data-testid="detail-ticket-number">#INC-1001</span>
+              <span class="severity-badge" id="detail-ticket-severity" data-testid="detail-ticket-severity">P1</span>
+              <span class="status-badge" id="detail-ticket-status" data-testid="detail-ticket-status">INVESTIGATING</span>
+            </div>
+            <h2 class="card-title" id="detail-ticket-title" data-testid="detail-ticket-title" style="border: none; padding: 0; margin-bottom: 12px;">Título do Incidente</h2>
+            <p id="detail-ticket-desc" data-testid="detail-ticket-desc" style="color: var(--text-main); white-space: pre-wrap; margin-bottom: 16px;"></p>
+            <div style="display: flex; gap: 16px; font-size: 0.8125rem; color: var(--text-muted);">
+              <span>Serviço: <strong id="detail-ticket-service" data-testid="detail-ticket-service" style="color: var(--text-main);"></strong></span>
+              <span>Criado por: <strong id="detail-ticket-creator" data-testid="detail-ticket-creator" style="color: var(--text-main);"></strong></span>
+              <span>Atribuído a: <strong id="detail-ticket-assignee" data-testid="detail-ticket-assignee" style="color: var(--text-main);"></strong></span>
+            </div>
+          </div>
+
+          <!-- Seção de Ações de Transição de Status -->
+          <div class="detail-card" id="status-transitions-card">
+            <h3 class="card-title">Fluxo de Triagem e Resolução</h3>
+            <p style="color: var(--text-muted); font-size: 0.8125rem; margin-bottom: 12px;">Transições permitidas para o status atual:</p>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-status-investigating" data-testid="btn-change-status-investigating">
+                Mover para Investigação
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-status-mitigated" data-testid="btn-change-status-mitigated">
+                Marcar como Mitigado
+              </button>
+              <button type="button" class="btn btn-primary btn-sm" id="btn-status-resolved" data-testid="btn-change-status-resolved">
+                Resolver Chamado
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-status-closed" data-testid="btn-change-status-closed">
+                Fechar Incidente
+              </button>
+            </div>
+          </div>
+
+          <!-- Seção de Notas de Investigação -->
+          <div class="detail-card">
+            <h3 class="card-title">Notas de Investigação</h3>
+            
+            <form id="form-add-note" style="margin-bottom: 20px;">
+              <div class="form-group" style="margin-bottom: 8px;">
+                <label for="textarea-note-content" class="form-label">Adicionar nota técnica</label>
+                <textarea 
+                  class="form-textarea" 
+                  id="textarea-note-content" 
+                  data-testid="textarea-new-note"
+                  placeholder="Descreva o andamento da investigação ou diagnóstico..."
+                  required
+                ></textarea>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <label id="label-internal-note" style="display: flex; align-items: center; gap: 6px; font-size: 0.8125rem; cursor: pointer;">
+                  <input type="checkbox" id="checkbox-internal-note" data-testid="checkbox-internal-note" checked />
+                  Nota interna (visível apenas para analistas)
+                </label>
+                <button type="submit" class="btn btn-primary btn-sm" id="btn-submit-note" data-testid="btn-submit-note">
+                  Registrar Nota
+                </button>
+              </div>
+            </form>
+
+            <div class="timeline-list" id="notes-list" data-testid="notes-list">
+              <!-- Notas inseridas dinamicamente -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Coluna Lateral: Anexos e Auditoria -->
+        <div class="detail-sidebar">
+          <!-- Card de Anexos -->
+          <div class="detail-card">
+            <h3 class="card-title">Anexos Técnicos</h3>
+            
+            <form id="form-upload-attachment" style="margin-bottom: 16px;">
+              <div class="form-group">
+                <input 
+                  type="file" 
+                  id="file-upload-input" 
+                  data-testid="file-upload-input" 
+                  accept=".log,.txt,.pdf,.png,.jpg,.jpeg"
+                  style="font-size: 0.75rem; color: var(--text-muted);"
+                />
+              </div>
+              <button type="submit" class="btn btn-secondary btn-sm" id="btn-upload-file" data-testid="btn-upload-file" style="margin-top: 8px; width: 100%;">
+                Enviar Anexo
+              </button>
+              <div id="upload-feedback" data-testid="upload-feedback" style="margin-top: 6px;"></div>
+            </form>
+
+            <div id="attachments-list" data-testid="attachments-list" style="display: flex; flex-direction: column; gap: 8px;">
+              <!-- Anexos listados dinamicamente -->
+            </div>
+          </div>
+
+          <!-- Card de Histórico de Auditoria -->
+          <div class="detail-card">
+            <h3 class="card-title">Trilha de Auditoria</h3>
+            <div class="timeline-list" id="audit-list" data-testid="audit-list" style="font-size: 0.75rem;">
+              <!-- Eventos de auditoria inseridos dinamicamente -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  </div>
+
+  <!-- Modal: Novo Incidente -->
+  <div class="modal-backdrop" id="modal-create-ticket" data-testid="modal-create-ticket" role="dialog" aria-modal="true" aria-labelledby="modal-create-title">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-create-title" style="font-size: 1.125rem; font-weight: 600;">Abrir Novo Incidente</h2>
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-close-create-modal" aria-label="Fechar modal">&times;</button>
+      </div>
+      <form id="form-create-ticket">
+        <div class="modal-body">
+          <div id="create-ticket-error" data-testid="create-ticket-error"></div>
+
+          <div class="form-group">
+            <label for="input-ticket-title" class="form-label">Título do Incidente *</label>
+            <input 
+              type="text" 
+              class="form-input" 
+              id="input-ticket-title" 
+              data-testid="input-ticket-title" 
+              placeholder="Ex: Falha na autenticação via OAuth" 
+              required
+            />
+            <span class="form-error" id="error-title" data-testid="error-title"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-ticket-service" class="form-label">Serviço Afetado *</label>
+            <input 
+              type="text" 
+              class="form-input" 
+              id="input-ticket-service" 
+              data-testid="input-ticket-service" 
+              placeholder="Ex: Autenticação, Pagamentos, Fila RabbitMQ" 
+              required
+            />
+            <span class="form-error" id="error-service" data-testid="error-service"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="select-ticket-severity" class="form-label">Severidade *</label>
+            <select class="form-select" id="select-ticket-severity" data-testid="select-ticket-severity" required>
+              <option value="P1">P1 - Crítico (Interrupção total ou risco financeiro)</option>
+              <option value="P2">P2 - Alto (Degradação severa de funcionalidade)</option>
+              <option value="P3" selected>P3 - Médio (Impacto moderado com contorno)</option>
+              <option value="P4">P4 - Baixo (Melhoria ou dúvida operacional)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="textarea-ticket-desc" class="form-label">Descrição dos Sintomas e Diagnóstico *</label>
+            <textarea 
+              class="form-textarea" 
+              id="textarea-ticket-desc" 
+              data-testid="textarea-ticket-desc" 
+              placeholder="Descreva o que ocorreu, horários de pico e mensagens de erro observadas..."
+              required
+            ></textarea>
+            <span class="form-error" id="error-desc" data-testid="error-desc"></span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btn-cancel-create" data-testid="btn-cancel-ticket">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-create" data-testid="btn-submit-ticket">Abrir Incidente</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Resolução de Incidente (Exige nota técnica) -->
+  <div class="modal-backdrop" id="modal-resolution" data-testid="modal-resolution" role="dialog" aria-modal="true" aria-labelledby="modal-resolution-title">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-resolution-title" style="font-size: 1.125rem; font-weight: 600;">Resolução do Incidente</h2>
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-close-resolution-modal" aria-label="Fechar modal">&times;</button>
+      </div>
+      <form id="form-resolution">
+        <div class="modal-body">
+          <p style="color: var(--text-muted); font-size: 0.875rem;">
+            Para marcar este chamado como resolvido, informe a causa raiz identificada e a ação corretiva aplicada.
+          </p>
+          <div class="form-group">
+            <label for="textarea-resolution-note" class="form-label">Nota de Resolução *</label>
+            <textarea 
+              class="form-textarea" 
+              id="textarea-resolution-note" 
+              data-testid="textarea-resolution-note" 
+              placeholder="Ex: Causa raiz foi timeout de conexão no pool de conexões do banco. Pool ampliado de 20 para 80."
+              required
+            ></textarea>
+            <span class="form-error" id="error-resolution" data-testid="error-resolution"></span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btn-cancel-resolution" data-testid="btn-cancel-resolution">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btn-confirm-resolution" data-testid="btn-confirm-resolution">Confirmar Resolução</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="/main.js"></script>
+</body>
+</html>
