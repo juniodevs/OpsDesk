@@ -1,9 +1,23 @@
 import { test, expect } from "../fixtures/test-fixtures.js";
 import path from "node:path";
+import fs from "node:fs";
 
 test.describe("Upload e Gerenciamento de Anexos Técnicos", () => {
-  const validLogPath = path.resolve(process.cwd(), "tests/fixtures/sample-error.log");
-  const forbiddenExePath = path.resolve(process.cwd(), "tests/fixtures/unauthorized.exe");
+  const fixturesDir = path.resolve(process.cwd(), "tests/fixtures");
+  const validLogPath = path.resolve(fixturesDir, "sample-error.log");
+  const forbiddenExePath = path.resolve(fixturesDir, "unauthorized.exe");
+
+  test.beforeAll(() => {
+    if (!fs.existsSync(fixturesDir)) {
+      fs.mkdirSync(fixturesDir, { recursive: true });
+    }
+    if (!fs.existsSync(validLogPath)) {
+      fs.writeFileSync(validLogPath, "[ERROR] 2026-10-17 12:00:00 Connection timeout in database pool\n", "utf8");
+    }
+    if (!fs.existsSync(forbiddenExePath)) {
+      fs.writeFileSync(forbiddenExePath, "MZ fake executable binary for upload rejection testing", "utf8");
+    }
+  });
 
   test("deve permitir upload de arquivo .log e exibi-lo na lista de anexos", async ({
     ticketsListPage,

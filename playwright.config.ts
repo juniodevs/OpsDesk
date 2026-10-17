@@ -11,7 +11,7 @@ export default defineConfig({
     ["html", { open: "never", outputFolder: "playwright-report" }],
   ],
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL: "http://127.0.0.1:3000",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
@@ -33,14 +33,14 @@ export default defineConfig({
       name: "API Tests",
       testDir: "./tests/api",
       use: {
-        baseURL: "http://localhost:3000",
+        baseURL: "http://127.0.0.1:3000",
       },
     },
   ],
   webServer: {
-    command: "npx tsx app/src/server/server.ts",
-    url: "http://localhost:3000/api/health",
+    command: "npm start",
+    url: "http://127.0.0.1:3000/api/health",
     reuseExistingServer: !process.env.CI,
-    timeout: 30000,
+    timeout: 60000,
   },
 });

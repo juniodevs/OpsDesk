@@ -59,15 +59,12 @@ export async function createServer() {
   return app;
 }
 
-// Inicialização direta do servidor
-const isMain = process.argv[1]?.includes("server.ts") || process.argv[1]?.includes("server.js");
-if (isMain) {
-  const app = await createServer();
-  app.listen({ port: PORT, host: HOST }, (err, address) => {
-    if (err) {
-      console.error("Erro ao iniciar servidor:", err);
-      process.exit(1);
-    }
-    console.log(`[OpsDesk AUT] Servidor operacional rodando em: http://localhost:${PORT}`);
-  });
-}
+const app = await createServer();
+app.listen({ port: PORT, host: HOST }, (err, address) => {
+  if (err) {
+    console.error("Erro ao iniciar servidor:", err);
+    process.exit(1);
+  }
+  console.log(`[OpsDesk AUT] Servidor operacional rodando em: http://${HOST}:${PORT}`);
+});
+

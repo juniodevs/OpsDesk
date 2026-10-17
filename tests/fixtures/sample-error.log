@@ -1,0 +1,3 @@
+[2026-10-17 10:45:12] ERROR ConnectionTimeout: Gateway did not respond within 30000ms
+[2026-10-17 10:45:15] WARN RetryAttempt: Retrying request to /v2/pix/charge (attempt 2 of 3)
+[2026-10-17 10:45:45] FATAL CircuitBreakerOpen: 5 consecutive failures, opening circuit.
